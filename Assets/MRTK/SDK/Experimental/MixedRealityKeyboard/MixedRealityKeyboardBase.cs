@@ -49,14 +49,7 @@ namespace Microsoft.MixedReality.Toolkit.Experimental.UI
         public bool DisableUIInteractionWhenTyping
         {
             get => disableUIInteractionWhenTyping;
-            set
-            {
-                if (value != disableUIInteractionWhenTyping && value == false && inputModule != null && inputModule.ProcessPaused)
-                {
-                    inputModule.ProcessPaused = false;
-                }
-                disableUIInteractionWhenTyping = value;
-            }
+            set => disableUIInteractionWhenTyping = value;
         }
 
         [SerializeField, Tooltip("Event which triggers when the keyboard is shown.")]
@@ -114,9 +107,9 @@ namespace Microsoft.MixedReality.Toolkit.Experimental.UI
 
         private bool multiLine = false;
 
-        private MixedRealityInputModule inputModule = null;
-
 #if WINDOWS_UWP
+        private bool inputDisabled = false;
+
         private InputPane inputPane = null;
         
         private TouchScreenKeyboard keyboard = null;
@@ -131,11 +124,6 @@ namespace Microsoft.MixedReality.Toolkit.Experimental.UI
         #region MonoBehaviour Implementation
 
 #if WINDOWS_UWP
-        protected virtual void Awake()
-        {
-            inputModule = CameraCache.Main.GetComponent<MixedRealityInputModule>();
-        }
-
         /// <summary>
         /// Initializes the UWP input pane.
         /// </summary>
@@ -152,19 +140,19 @@ namespace Microsoft.MixedReality.Toolkit.Experimental.UI
         private void OnInputPaneHiding(InputPane inputPane, InputPaneVisibilityEventArgs args)
         {
             OnKeyboardHiding();
-            if (DisableUIInteractionWhenTyping && inputModule != null)
+            if (inputDisabled)
             {
-                inputModule.ProcessPaused = false;
+                UnityEngine.WSA.Application.InvokeOnAppThread(() =>
+                {
+                    CoreServices.InputSystem?.PopInputDisable();
+                }, false);
+                inputDisabled = false;
             }
         }
 
         private void OnInputPaneShowing(InputPane inputPane, InputPaneVisibilityEventArgs args)
         {
             OnKeyboardShowing();
-            if (DisableUIInteractionWhenTyping && inputModule != null)
-            {
-                inputModule.ProcessPaused = true;
-            }
         }
 
         void OnDestroy()
@@ -263,6 +251,12 @@ namespace Microsoft.MixedReality.Toolkit.Experimental.UI
             }
 
             onShowKeyboard?.Invoke();
+
+            if (DisableUIInteractionWhenTyping && CoreServices.InputSystem != null)
+            {
+                CoreServices.InputSystem.PushInputDisable();
+                inputDisabled = true;
+            }
 
             if (stateUpdate == null)
             {

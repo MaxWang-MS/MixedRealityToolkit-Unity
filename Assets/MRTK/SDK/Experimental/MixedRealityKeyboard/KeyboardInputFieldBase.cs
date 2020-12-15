@@ -45,7 +45,7 @@ namespace Microsoft.MixedReality.Toolkit.Experimental.UI
 
 #if WINDOWS_UWP
 
-        protected override void Awake()
+        protected virtual void Awake()
         {
             if ((inputField = GetComponent<T>()) == null)
             {

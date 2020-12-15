@@ -30,7 +30,7 @@ namespace Microsoft.MixedReality.Toolkit.Examples.Demos
 #pragma warning disable 0414
         [SerializeField]
         private MixedRealityKeyboardPreview mixedRealityKeyboardPreview = null;
-        [SerializeField, Tooltip("Whether disable user's interaction with other UI elements while typing. Use this option to decrease the chance of keyboard getting accidentally closed.")]
+        [SerializeField, Tooltip("Whether disable user's interaction with other UI elements while typing. Use this option to decrease the chance of keyboard getting accidentally closed. Due to external issues please leave this boolean to be false for HoloLens 1 and WMR headsets.")]
         private bool disableUIInteractionWhenTyping = false;
 #pragma warning restore 0414
 
